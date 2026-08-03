@@ -26,7 +26,7 @@ export class TileManager {
   private readonly scene: THREE.Scene;
   private readonly tiles = new Map<string, TileRuntime>();
   private readonly root = new THREE.Group();
-  private readonly queue = new LoadQueue(3);
+  private readonly queue = new LoadQueue(1);
   private readonly lodController = new LODController();
   private readonly modelLoader = new ModelLoader();
   private readonly disposer = new ResourceDisposer();
@@ -48,6 +48,7 @@ export class TileManager {
         object: null,
         loadedBytes: 0,
         lastDistance: Number.POSITIVE_INFINITY,
+        lastUsedAt: 0,
         requestToken: 0,
       });
     }
@@ -68,7 +69,7 @@ export class TileManager {
 
     for (const tile of this.tiles.values()) {
       tile.requestToken += 1;
-      this.disposeTile(tile);
+      this.disposeTile(tile, true);
       tile.state = 'unloaded';
       tile.activeLod = null;
       tile.desiredLod = null;
@@ -107,7 +108,7 @@ export class TileManager {
         tile.desiredLod = null;
 
         if (tile.object) {
-          this.disposeTile(tile);
+          this.detachTile(tile);
         }
 
         continue;
@@ -115,6 +116,7 @@ export class TileManager {
 
       this.ensureTile(tile, desiredLod, tile.lastDistance);
     }
+
   }
 
   // PerformancePanel에 전달할 현재 렌더링 지표입니다.
@@ -124,7 +126,9 @@ export class TileManager {
     frameTimeMs: number,
   ): PerformanceSnapshot {
     const queueStats = this.queue.getStats();
-    const loadedTiles = [...this.tiles.values()].filter((tile) => tile.object !== null).length;
+    const loadedTiles = [...this.tiles.values()].filter(
+      (tile) => tile.object !== null && tile.object.parent === this.root,
+    ).length;
     const loadedBytes = [...this.tiles.values()].reduce((sum, tile) => sum + tile.loadedBytes, 0);
 
     return {
@@ -159,7 +163,7 @@ export class TileManager {
     this.queue.clear();
 
     for (const tile of this.tiles.values()) {
-      this.disposeTile(tile);
+      this.disposeTile(tile, true);
     }
 
     this.scene.remove(this.root);
@@ -168,6 +172,24 @@ export class TileManager {
   private ensureTile(tile: TileRuntime, lod: LodLevel, distance: number): void {
     if (tile.activeLod === lod && tile.object) {
       tile.desiredLod = lod;
+      tile.lastUsedAt = performance.now();
+
+      if (tile.object.parent !== this.root) {
+        tile.object.visible = true;
+        this.root.add(tile.object);
+        tile.state = 'loaded';
+      }
+
+      return;
+    }
+
+    // 이미 더 높은 LOD가 로딩되어 있다면 낮은 LOD로 즉시 갈아타지 않습니다.
+    // high -> proxy 교체 과정에서 기존 GLB를 dispose하면,
+    // 다시 가까워질 때 GLB 파싱/GPU 업로드가 반복되어 더 큰 프레임 드랍이 생깁니다.
+    if (tile.object && tile.activeLod && isLodDowngrade(tile.activeLod, lod)) {
+      tile.desiredLod = tile.activeLod;
+      tile.lastUsedAt = performance.now();
+      tile.state = tile.object.parent === this.root ? 'loaded' : 'unloaded';
       return;
     }
 
@@ -204,12 +226,13 @@ export class TileManager {
         }
 
         if (tile.object) {
-          this.disposeTile(tile);
+          this.disposeTile(tile, true);
         }
 
         tile.object = object;
         tile.activeLod = lod;
         tile.loadedBytes = tile.entry.lods[lod].estimatedBytes;
+        tile.lastUsedAt = performance.now();
         tile.state = 'loaded';
         this.root.add(object);
 
@@ -225,17 +248,50 @@ export class TileManager {
     });
   }
 
-  private disposeTile(tile: TileRuntime): void {
+  private detachTile(tile: TileRuntime): void {
+    if (!tile.object) {
+      return;
+    }
+
+    this.root.remove(tile.object);
+    tile.object.visible = false;
+    tile.state = 'unloaded';
+    tile.lastUsedAt = performance.now();
+  }
+
+  private disposeTile(tile: TileRuntime, clearEvenAttached: boolean): void {
     if (!tile.object) {
       return;
     }
 
     tile.state = 'disposing';
-    this.root.remove(tile.object);
+
+    if (tile.object.parent === this.root) {
+      this.root.remove(tile.object);
+    } else if (!clearEvenAttached) {
+      // 이미 scene 밖에 있는 detached cache만 dispose하는 경로입니다.
+    }
+
     this.disposer.disposeObject(tile.object);
     tile.object = null;
     tile.activeLod = null;
     tile.loadedBytes = 0;
     tile.state = 'unloaded';
   }
+}
+
+function lodRank(lod: LodLevel): number {
+  if (lod === 'proxy') {
+    return 0;
+  }
+
+  if (lod === 'medium') {
+    return 1;
+  }
+
+  return 2;
+}
+
+function isLodDowngrade(current: LodLevel, next: LodLevel): boolean {
+  return lodRank(next) < lodRank(current);
 }

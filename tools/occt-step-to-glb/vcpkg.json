@@ -1,0 +1,7 @@
+{
+  "name": "occt-step-to-glb",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "opencascade"
+  ]
+}

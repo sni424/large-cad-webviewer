@@ -60,6 +60,7 @@ export interface TileRuntime {
   object: Object3D | null;
   loadedBytes: number;
   lastDistance: number;
+  lastUsedAt: number;
   requestToken: number;
   error?: string;
 }

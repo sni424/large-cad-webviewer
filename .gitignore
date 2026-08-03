@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+tools/**/build
+public/models/*.glb
+public/models/*.gltf
+public/models/**/*.glb
+public/models/**/*.gltf
+tools/occt-step-to-glb/*analysis*.txt
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +28,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# model file
+public/cad/
+public/models/**/*.glb
+public/models/*.glb
