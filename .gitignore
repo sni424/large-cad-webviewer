@@ -31,5 +31,5 @@ tools/occt-step-to-glb/*analysis*.txt
 
 # model file
 public/cad/
-public/models/**/*.glb
-public/models/*.glb
+# public/models/**/*.glb
+# public/models/*.glb
