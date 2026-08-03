@@ -12,10 +12,6 @@ dist
 dist-ssr
 *.local
 tools/**/build
-public/models/*.glb
-public/models/*.gltf
-public/models/**/*.glb
-public/models/**/*.gltf
 tools/occt-step-to-glb/*analysis*.txt
 
 # Editor directories and files
@@ -31,5 +27,3 @@ tools/occt-step-to-glb/*analysis*.txt
 
 # model file
 public/cad/
-# public/models/**/*.glb
-# public/models/*.glb
