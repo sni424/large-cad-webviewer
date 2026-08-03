@@ -63,11 +63,14 @@ export class LoadQueue {
       this.pending.delete(job.key);
       this.active.add(job.key);
 
+      // run()은 실제 GLB fetch/parse 또는 proxy 생성 작업입니다.
+      // 완료/실패 처리는 TileManager가 넘겨준 callback에서 타일 상태와 scene attach를 정리합니다.
       job
         .run()
         .then(job.onComplete)
         .catch(job.onError)
         .finally(() => {
+          // 하나가 끝나면 다음 대기 작업을 바로 시작합니다.
           this.active.delete(job.key);
           this.pump();
         });

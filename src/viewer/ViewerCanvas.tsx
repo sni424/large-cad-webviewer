@@ -12,12 +12,16 @@ interface ViewerCanvasProps {
   mode: LoadMode;
 }
 
+// 타일 기반 뷰어 전용 Canvas입니다.
+// React Three Fiber는 render loop와 카메라/renderer 생명주기를 관리하고,
+// 실제 CAD 타일 로딩 전략은 아래 TileRuntimeBridge가 TileManager에 위임합니다.
 export function ViewerCanvas({ manifest, mode }: ViewerCanvasProps) {
   return (
     <Canvas
-      className="h-full w-full bg-slate-950"
+      className="h-full w-full touch-none bg-slate-950"
       dpr={[1, 1.5]}
       gl={{
+        // CAD PoC에서는 선명한 MSAA보다 프레임 안정성이 중요해서 antialias를 끕니다.
         antialias: false,
         powerPreference: 'high-performance',
       }}
@@ -31,6 +35,8 @@ export function ViewerCanvas({ manifest, mode }: ViewerCanvasProps) {
   );
 }
 
+// CAD 모델의 금속/플라스틱 재질 색이 너무 죽지 않도록 전체 조명은 강하게 둡니다.
+// 실제 제품에서는 HDRI 또는 환경광을 따로 넣는 쪽이 더 자연스럽습니다.
 function SceneLighting() {
   return (
     <>
@@ -41,6 +47,8 @@ function SceneLighting() {
   );
 }
 
+// 바닥과 grid는 실제 모델 위치/스케일을 감으로 확인하기 위한 기준면입니다.
+// 성능 비교 대상은 아니므로 단순 geometry만 사용합니다.
 function SceneFloor() {
   return (
     <>
@@ -54,6 +62,8 @@ function SceneFloor() {
   );
 }
 
+// R3F 세계와 직접 작성한 imperative class(TileManager)를 연결하는 어댑터입니다.
+// useThree로 scene/camera/renderer를 얻고, 매 프레임 TileManager에 업데이트 신호를 줍니다.
 function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
   const { scene, camera, gl, size } = useThree();
   const monitor = useMemo(() => new PerformanceMonitor(), []);
@@ -64,6 +74,7 @@ function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
   const setTileRows = useViewerStore((state) => state.setTileRows);
 
   useEffect(() => {
+    // manifest가 바뀌면 기존 TileManager를 dispose하고 새 데이터셋으로 다시 만듭니다.
     const manager = new TileManager(scene, manifest);
 
     managerRef.current = manager;
@@ -85,6 +96,8 @@ function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
   }, [camera, mode]);
 
   useEffect(() => {
+    // OrbitControls 조작 중에는 high LOD attach를 잠깐 미룹니다.
+    // 로딩 완료 직후 scene에 붙는 순간 GPU upload가 발생해서 조작이 끊길 수 있기 때문입니다.
     const controls = controlsRef.current;
 
     if (!controls) {
@@ -126,6 +139,7 @@ function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
       return;
     }
 
+    // FPS와 frame time은 매 프레임 계산하되, 타일 판정은 아래에서 100ms마다만 실행합니다.
     const frame = monitor.frame();
     const now = performance.now();
 

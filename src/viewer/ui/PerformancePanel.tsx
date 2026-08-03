@@ -3,13 +3,16 @@ import { useViewerStore } from '../store/viewerStore';
 
 const modes: LoadMode[] = ['full', 'optimized'];
 
+// ViewerStore에 쌓인 런타임 지표를 화면에 표시합니다.
+// renderer.info 기반 값(draw calls, triangles)은 브라우저에서 직접 얻는 값이고,
+// loadedBytes는 manifest의 estimatedBytes를 더한 추정 로드 용량입니다.
 export function PerformancePanel() {
   const snapshot = useViewerStore((state) => state.snapshot);
   const comparison = useViewerStore((state) => state.comparison);
   const tileRows = useViewerStore((state) => state.tileRows);
 
   return (
-    <div className="mt-5 space-y-5">
+    <div className="mt-4 space-y-4 lg:mt-5 lg:space-y-5">
       <section>
         <h2 className="mb-2 text-sm font-semibold text-slate-100">실시간 성능</h2>
         <div className="grid grid-cols-2 gap-2">
@@ -30,14 +33,15 @@ export function PerformancePanel() {
               snapshot?.initialDisplayMs == null ? '측정 중' : `${snapshot.initialDisplayMs.toFixed(0)} ms`
             }
           />
+          {/* WebGL 표준 API만으로는 GPU memory를 정확히 알 수 없으므로 숫자로 꾸며내지 않습니다. */}
           <Metric label="GPU Memory" value="측정 불가" />
         </div>
       </section>
 
       <section>
         <h2 className="mb-2 text-sm font-semibold text-slate-100">모드 비교</h2>
-        <div className="overflow-hidden rounded-md border border-slate-800">
-          <table className="w-full border-collapse text-left text-xs">
+        <div className="overflow-x-auto rounded-md border border-slate-800">
+          <table className="min-w-[330px] w-full border-collapse text-left text-xs">
             <thead className="bg-slate-800 text-slate-300">
               <tr>
                 <th className="px-2 py-2 font-medium">모드</th>
@@ -85,8 +89,8 @@ export function PerformancePanel() {
 
       <section>
         <h2 className="mb-2 text-sm font-semibold text-slate-100">가까운 타일</h2>
-        <div className="overflow-hidden rounded-md border border-slate-800">
-          <table className="w-full border-collapse text-left text-xs">
+        <div className="overflow-x-auto rounded-md border border-slate-800">
+          <table className="min-w-[300px] w-full border-collapse text-left text-xs">
             <thead className="bg-slate-800 text-slate-300">
               <tr>
                 <th className="px-2 py-2 font-medium">id</th>
@@ -114,9 +118,11 @@ export function PerformancePanel() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 rounded-md border border-slate-800 bg-slate-950 px-3 py-2">
+    <div className="min-w-0 rounded-md border border-slate-800 bg-slate-950 px-2.5 py-2 lg:px-3">
       <div className="text-xs text-slate-500">{label}</div>
-      <div className="mt-1 break-words text-base font-semibold text-slate-100">{value}</div>
+      <div className="mt-1 break-words text-sm font-semibold text-slate-100 lg:text-base">
+        {value}
+      </div>
     </div>
   );
 }
@@ -125,6 +131,7 @@ function modeLabel(mode: LoadMode): string {
   return mode === 'full' ? '전체' : '최적화';
 }
 
+// 성능 표에서는 큰 triangle 숫자를 압축해서 패널 폭 안에 들어오게 합니다.
 function compactNumber(value: number): string {
   if (value >= 1_000_000) {
     return `${(value / 1_000_000).toFixed(1)}M`;
@@ -137,6 +144,7 @@ function compactNumber(value: number): string {
   return value.toString();
 }
 
+// 이 값은 실제 GPU 메모리가 아니라 manifest에 적힌 파일 크기 합산입니다.
 function formatBytes(bytes: number): string {
   if (bytes <= 0) {
     return '0 MB';

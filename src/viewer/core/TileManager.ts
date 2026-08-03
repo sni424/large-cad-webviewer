@@ -119,6 +119,8 @@ export class TileManager {
       });
 
       if (desiredLod === null) {
+        // null은 "지금은 이 타일을 화면에 보여줄 필요가 없다"는 뜻입니다.
+        // 아직 시작하지 않은 네트워크/파싱 작업은 취소하고, 이미 붙어 있던 객체는 scene에서 뺍니다.
         this.queue.cancel((job) => job.tileId === tile.entry.id);
         tile.desiredLod = null;
 
@@ -186,6 +188,8 @@ export class TileManager {
   }
 
   private ensureTile(tile: TileRuntime, lod: LodLevel, distance: number): void {
+    // 이미 원하는 LOD 객체가 메모리에 있으면 다시 로딩하지 않습니다.
+    // scene에서 잠깐 빠져 있던 객체라면 pending attach 목록에 넣어서 다시 붙입니다.
     if (tile.activeLod === lod && tile.object) {
       tile.desiredLod = lod;
       tile.lastUsedAt = performance.now();
@@ -223,6 +227,7 @@ export class TileManager {
       },
       onComplete: (object) => {
         // 오래 걸린 로딩이 끝났는데 이미 다른 LOD가 필요해졌다면 버립니다.
+        // 예: high GLB를 기다리는 중 카메라가 멀어져 proxy가 필요해진 경우
         if (tile.requestToken !== requestToken || tile.desiredLod !== lod) {
           this.disposer.disposeObject(object);
           tile.state = tile.object ? 'loaded' : 'unloaded';
@@ -230,6 +235,7 @@ export class TileManager {
         }
 
         if (tile.object) {
+          // 새 LOD 객체가 준비됐으므로 기존 LOD 객체의 GPU 자원을 정리합니다.
           this.disposeTile(tile, true);
         }
 
@@ -254,6 +260,8 @@ export class TileManager {
       return;
     }
 
+    // detach는 dispose가 아닙니다.
+    // scene에서는 빠지지만 object 참조는 남겨두어, 같은 LOD가 다시 필요하면 재사용할 수 있습니다.
     this.root.remove(tile.object);
     tile.object.visible = false;
     this.pendingAttachTileIds.delete(tile.entry.id);
@@ -307,6 +315,8 @@ export class TileManager {
       return;
     }
 
+    // dispose는 GPU/CPU 리소스를 실제로 해제하는 강한 정리입니다.
+    // LOD 교체, 모드 reset, 컴포넌트 unmount처럼 다시 쓸 가능성이 낮은 경우에만 호출합니다.
     tile.state = 'disposing';
     this.pendingAttachTileIds.delete(tile.entry.id);
 
