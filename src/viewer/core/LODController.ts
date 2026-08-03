@@ -1,27 +1,34 @@
+import * as THREE from 'three';
 import type { LodLevel, TileRuntime } from '../types';
 
-// LOD 전환 거리입니다.
-// enter와 leave 값을 분리해서 카메라가 경계선 근처에 있을 때
-// high <-> medium <-> proxy가 계속 흔들리는 현상을 줄입니다.
+// 카메라 거리와 화면 크기를 같이 쓰는 LOD 기준입니다.
+// Cargo STEP처럼 타일 크기가 크게 다른 데이터는 radius 기반 화면 크기만 쓰면
+// 같은 거리의 작은 부품과 큰 선체가 서로 다르게 사라집니다.
 export interface LODThresholds {
-  enterHigh: number;
-  leaveHigh: number;
-  enterMedium: number;
-  leaveMedium: number;
-  reloadDistance: number;
+  enterHighDistance: number;
+  leaveHighDistance: number;
+  enterMediumDistance: number;
+  leaveMediumDistance: number;
+  loadDistance: number;
   unloadDistance: number;
 }
 
+export interface LODEvaluationInput {
+  camera: THREE.Camera;
+  viewportHeight: number;
+}
+
 const DEFAULT_THRESHOLDS: LODThresholds = {
-  enterHigh: 18,
-  leaveHigh: 26,
-  enterMedium: 42,
-  leaveMedium: 56,
-  reloadDistance: 70,
-  unloadDistance: 86,
+  enterHighDistance: 58,
+  leaveHighDistance: 72,
+  enterMediumDistance: 108,
+  leaveMediumDistance: 130,
+  loadDistance: 145,
+  unloadDistance: 165,
 };
 
-// 카메라와 타일의 거리를 보고 어떤 LOD를 써야 하는지 결정합니다.
+// 카메라에서 타일 중심까지의 거리 band를 우선하고,
+// 화면에서 정말 작아진 타일만 추가로 unload합니다.
 export class LODController {
   private readonly thresholds: LODThresholds;
 
@@ -29,34 +36,32 @@ export class LODController {
     this.thresholds = thresholds;
   }
 
-  getDesiredLod(tile: TileRuntime, distanceToCamera: number): LodLevel | null {
-    // 타일 중심이 아니라 타일 표면까지의 대략적인 거리로 판단합니다.
-    const distanceFromTileSurface = Math.max(0, distanceToCamera - tile.entry.radius);
+  getDesiredLod(tile: TileRuntime, input: LODEvaluationInput): LodLevel | null {
+    const centerDistance = this.getCenterDistance(tile, input.camera);
 
     // 현재 목표 LOD가 있으면 그 값을 우선 봅니다.
     // 로딩 중인 상태에서도 같은 기준으로 hysteresis를 적용하기 위해서입니다.
     const currentLod = tile.desiredLod ?? tile.activeLod;
 
-    // 아직 로딩되지 않은 타일이 너무 멀면 아예 로딩하지 않습니다.
-    if (currentLod === null && distanceFromTileSurface > this.thresholds.reloadDistance) {
+    // 같은 거리의 부품들이 들쭉날쭉하게 보이지 않도록 중심 거리 band를 먼저 적용합니다.
+    if (currentLod === null && centerDistance > this.thresholds.loadDistance) {
       return null;
     }
 
-    // 이미 로딩된 타일도 너무 멀어지면 unload 대상이 됩니다.
-    if (currentLod !== null && distanceFromTileSurface > this.thresholds.unloadDistance) {
+    if (currentLod !== null && centerDistance > this.thresholds.unloadDistance) {
       return null;
     }
 
     if (currentLod === 'high') {
-      return distanceFromTileSurface > this.thresholds.leaveHigh ? 'medium' : 'high';
+      return centerDistance > this.thresholds.leaveHighDistance ? 'medium' : 'high';
     }
 
     if (currentLod === 'medium') {
-      if (distanceFromTileSurface < this.thresholds.enterHigh) {
+      if (centerDistance < this.thresholds.enterHighDistance) {
         return 'high';
       }
 
-      if (distanceFromTileSurface > this.thresholds.leaveMedium) {
+      if (centerDistance > this.thresholds.leaveMediumDistance) {
         return 'proxy';
       }
 
@@ -64,23 +69,23 @@ export class LODController {
     }
 
     if (currentLod === 'proxy') {
-      if (distanceFromTileSurface < this.thresholds.enterHigh) {
+      if (centerDistance < this.thresholds.enterHighDistance) {
         return 'high';
       }
 
-      if (distanceFromTileSurface < this.thresholds.enterMedium) {
+      if (centerDistance < this.thresholds.enterMediumDistance) {
         return 'medium';
       }
 
       return 'proxy';
     }
 
-    // 처음 로딩되는 타일은 거리 기준으로 바로 적절한 LOD를 고릅니다.
-    if (distanceFromTileSurface < this.thresholds.enterHigh) {
+    // 처음 로딩되는 타일은 거리 band 기준으로 바로 적절한 LOD를 고릅니다.
+    if (centerDistance < this.thresholds.enterHighDistance) {
       return 'high';
     }
 
-    if (distanceFromTileSurface < this.thresholds.enterMedium) {
+    if (centerDistance < this.thresholds.enterMediumDistance) {
       return 'medium';
     }
 
@@ -93,5 +98,18 @@ export class LODController {
     const lodPenalty = lod === 'high' ? 0 : lod === 'medium' ? 250 : 500;
 
     return distanceToCamera + lodPenalty + tile.entry.radius * 0.1;
+  }
+
+  private getCenterDistance(tile: TileRuntime, camera: THREE.Camera): number {
+    const tileCenter = new THREE.Vector3(
+      tile.entry.center[0],
+      tile.entry.center[1],
+      tile.entry.center[2],
+    );
+
+    const cameraPosition = new THREE.Vector3();
+    camera.getWorldPosition(cameraPosition);
+
+    return cameraPosition.distanceTo(tileCenter);
   }
 }

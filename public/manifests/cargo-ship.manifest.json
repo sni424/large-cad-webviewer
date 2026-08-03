@@ -2,500 +2,1193 @@
   "id": "cargo-ship-components",
   "name": "Cargo Ship Component Tiles",
   "units": "m",
-  "description": "Component-level normalized GLB tiles generated from STEP by OCCT.",
+  "description": "Component-level normalized GLB tiles generated from STEP by OCCT. Split tiles are exported from the original XCAF labels so CAD material/color assignments are preserved; heavy tiles use proxy at medium distance.",
   "tiles": [
     {
       "id": "component-001",
-      "center": [0.000, 5.646, -0.000],
+      "center": [
+        0,
+        5.646,
+        0
+      ],
       "radius": 39.048,
       "bounds": {
-        "min": [-37.251, -2.038, -8.833],
-        "max": [37.251, 13.330, 8.833]
+        "min": [
+          -37.251,
+          -2.038,
+          -8.833
+        ],
+        "max": [
+          37.251,
+          13.33,
+          8.833
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-001.glb", "estimatedBytes": 665812 },
-        "medium": { "url": "/models/cargo-ship-components/component-001.glb", "estimatedBytes": 665812 },
-        "proxy": { "url": "proxy-box://component-001", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-001.glb",
+          "estimatedBytes": 955316
+        },
+        "medium": {
+          "url": "proxy-box://component-001",
+          "estimatedBytes": 2048
+        },
+        "proxy": {
+          "url": "proxy-box://component-001",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-001.json"
     },
     {
       "id": "component-002",
-      "center": [-20.994, 12.492, 0.000],
+      "center": [
+        -20.994,
+        12.492,
+        0
+      ],
       "radius": 8.594,
       "bounds": {
-        "min": [-25.529, 7.568, -5.389],
-        "max": [-16.459, 17.416, 5.389]
+        "min": [
+          -25.529,
+          7.568,
+          -5.389
+        ],
+        "max": [
+          -16.459,
+          17.416,
+          5.389
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-002.glb", "estimatedBytes": 15173604 },
-        "medium": { "url": "/models/cargo-ship-components/component-002.glb", "estimatedBytes": 15173604 },
-        "proxy": { "url": "proxy-box://component-002", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-002.glb",
+          "estimatedBytes": 7083752
+        },
+        "medium": {
+          "url": "proxy-box://component-002",
+          "estimatedBytes": 2048
+        },
+        "proxy": {
+          "url": "proxy-box://component-002",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-002.json"
     },
     {
       "id": "component-003",
-      "center": [-25.219, 9.368, 0.443],
+      "center": [
+        -25.219,
+        9.368,
+        0.443
+      ],
       "radius": 2.462,
       "bounds": {
-        "min": [-25.605, 7.591, -1.217],
-        "max": [-24.832, 11.146, 2.103]
+        "min": [
+          -25.605,
+          7.591,
+          -1.217
+        ],
+        "max": [
+          -24.832,
+          11.146,
+          2.103
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-003.glb", "estimatedBytes": 141356 },
-        "medium": { "url": "/models/cargo-ship-components/component-003.glb", "estimatedBytes": 141356 },
-        "proxy": { "url": "proxy-box://component-003", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-003.glb",
+          "estimatedBytes": 112280
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-003.glb",
+          "estimatedBytes": 100212
+        },
+        "proxy": {
+          "url": "proxy-box://component-003",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-003.json"
     },
     {
       "id": "component-004",
-      "center": [-16.791, 9.368, 4.970],
+      "center": [
+        -16.791,
+        9.368,
+        4.97
+      ],
       "radius": 2.462,
       "bounds": {
-        "min": [-18.451, 7.591, 4.583],
-        "max": [-15.132, 11.146, 5.357]
+        "min": [
+          -18.451,
+          7.591,
+          4.583
+        ],
+        "max": [
+          -15.132,
+          11.146,
+          5.357
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-004.glb", "estimatedBytes": 141364 },
-        "medium": { "url": "/models/cargo-ship-components/component-004.glb", "estimatedBytes": 141364 },
-        "proxy": { "url": "proxy-box://component-004", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-004.glb",
+          "estimatedBytes": 112380
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-004.glb",
+          "estimatedBytes": 100312
+        },
+        "proxy": {
+          "url": "proxy-box://component-004",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-004.json"
     },
     {
       "id": "component-005",
-      "center": [-20.361, 7.837, 6.170],
-      "radius": 0.730,
+      "center": [
+        -20.361,
+        7.837,
+        6.17
+      ],
+      "radius": 0.73,
       "bounds": {
-        "min": [-20.950, 7.535, 5.863],
-        "max": [-19.773, 8.140, 6.477]
+        "min": [
+          -20.95,
+          7.535,
+          5.863
+        ],
+        "max": [
+          -19.773,
+          8.14,
+          6.477
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-005.glb", "estimatedBytes": 68340 },
-        "medium": { "url": "/models/cargo-ship-components/component-005.glb", "estimatedBytes": 68340 },
-        "proxy": { "url": "proxy-box://component-005", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-005.glb",
+          "estimatedBytes": 84976
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-005.glb",
+          "estimatedBytes": 75956
+        },
+        "proxy": {
+          "url": "proxy-box://component-005",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-005.json"
     },
     {
       "id": "component-006",
-      "center": [-26.655, 7.837, 5.087],
+      "center": [
+        -26.655,
+        7.837,
+        5.087
+      ],
       "radius": 0.765,
       "bounds": {
-        "min": [-27.256, 7.535, 4.723],
-        "max": [-26.054, 8.140, 5.451]
+        "min": [
+          -27.256,
+          7.535,
+          4.723
+        ],
+        "max": [
+          -26.054,
+          8.14,
+          5.451
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-006.glb", "estimatedBytes": 68336 },
-        "medium": { "url": "/models/cargo-ship-components/component-006.glb", "estimatedBytes": 68336 },
-        "proxy": { "url": "proxy-box://component-006", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-006.glb",
+          "estimatedBytes": 84976
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-006.glb",
+          "estimatedBytes": 75952
+        },
+        "proxy": {
+          "url": "proxy-box://component-006",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-006.json"
     },
     {
       "id": "component-007",
-      "center": [-20.354, 7.837, -6.168],
+      "center": [
+        -20.354,
+        7.837,
+        -6.168
+      ],
       "radius": 0.731,
       "bounds": {
-        "min": [-20.944, 7.535, -6.478],
-        "max": [-19.765, 8.140, -5.859]
+        "min": [
+          -20.944,
+          7.535,
+          -6.478
+        ],
+        "max": [
+          -19.765,
+          8.14,
+          -5.859
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-007.glb", "estimatedBytes": 68364 },
-        "medium": { "url": "/models/cargo-ship-components/component-007.glb", "estimatedBytes": 68364 },
-        "proxy": { "url": "proxy-box://component-007", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-007.glb",
+          "estimatedBytes": 84976
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-007.glb",
+          "estimatedBytes": 75952
+        },
+        "proxy": {
+          "url": "proxy-box://component-007",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-007.json"
     },
     {
       "id": "component-008",
-      "center": [-26.655, 7.837, -5.085],
+      "center": [
+        -26.655,
+        7.837,
+        -5.085
+      ],
       "radius": 0.764,
       "bounds": {
-        "min": [-27.255, 7.535, -5.447],
-        "max": [-26.054, 8.140, -4.723]
+        "min": [
+          -27.255,
+          7.535,
+          -5.447
+        ],
+        "max": [
+          -26.054,
+          8.14,
+          -4.723
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-008.glb", "estimatedBytes": 68196 },
-        "medium": { "url": "/models/cargo-ship-components/component-008.glb", "estimatedBytes": 68196 },
-        "proxy": { "url": "proxy-box://component-008", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-008.glb",
+          "estimatedBytes": 84976
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-008.glb",
+          "estimatedBytes": 75948
+        },
+        "proxy": {
+          "url": "proxy-box://component-008",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-008.json"
     },
     {
       "id": "component-009",
-      "center": [-29.082, 8.724, -2.178],
-      "radius": 2.100,
+      "center": [
+        -29.082,
+        8.724,
+        -2.178
+      ],
+      "radius": 2.1,
       "bounds": {
-        "min": [-30.157, 7.560, -3.557],
-        "max": [-28.008, 9.888, -0.799]
+        "min": [
+          -30.157,
+          7.56,
+          -3.557
+        ],
+        "max": [
+          -28.008,
+          9.888,
+          -0.799
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-009.glb", "estimatedBytes": 699308 },
-        "medium": { "url": "/models/cargo-ship-components/component-009.glb", "estimatedBytes": 699308 },
-        "proxy": { "url": "proxy-box://component-009", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-009.glb",
+          "estimatedBytes": 1016316
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-009.glb",
+          "estimatedBytes": 857040
+        },
+        "proxy": {
+          "url": "proxy-box://component-009",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-009.json"
     },
     {
       "id": "component-010",
-      "center": [-29.082, 8.724, 2.178],
-      "radius": 2.100,
+      "center": [
+        -29.082,
+        8.724,
+        2.178
+      ],
+      "radius": 2.1,
       "bounds": {
-        "min": [-30.157, 7.560, 0.799],
-        "max": [-28.008, 9.888, 3.557]
+        "min": [
+          -30.157,
+          7.56,
+          0.799
+        ],
+        "max": [
+          -28.008,
+          9.888,
+          3.557
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-010.glb", "estimatedBytes": 698940 },
-        "medium": { "url": "/models/cargo-ship-components/component-010.glb", "estimatedBytes": 698940 },
-        "proxy": { "url": "proxy-box://component-010", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-010.glb",
+          "estimatedBytes": 1016316
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-010.glb",
+          "estimatedBytes": 857044
+        },
+        "proxy": {
+          "url": "proxy-box://component-010",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-010.json"
     },
     {
       "id": "component-011",
-      "center": [-16.791, 9.368, -4.970],
+      "center": [
+        -16.791,
+        9.368,
+        -4.97
+      ],
       "radius": 2.462,
       "bounds": {
-        "min": [-18.451, 7.591, -5.357],
-        "max": [-15.132, 11.146, -4.583]
+        "min": [
+          -18.451,
+          7.591,
+          -5.357
+        ],
+        "max": [
+          -15.132,
+          11.146,
+          -4.583
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-011.glb", "estimatedBytes": 141380 },
-        "medium": { "url": "/models/cargo-ship-components/component-011.glb", "estimatedBytes": 141380 },
-        "proxy": { "url": "proxy-box://component-011", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-011.glb",
+          "estimatedBytes": 112380
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-011.glb",
+          "estimatedBytes": 100312
+        },
+        "proxy": {
+          "url": "proxy-box://component-011",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-011.json"
     },
     {
       "id": "component-012",
-      "center": [-28.165, 11.980, 2.410],
+      "center": [
+        -28.165,
+        11.98,
+        2.41
+      ],
       "radius": 5.243,
       "bounds": {
-        "min": [-31.925, 9.925, -0.611],
-        "max": [-24.405, 14.034, 5.430]
+        "min": [
+          -31.925,
+          9.925,
+          -0.611
+        ],
+        "max": [
+          -24.405,
+          14.034,
+          5.43
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-012.glb", "estimatedBytes": 682420 },
-        "medium": { "url": "/models/cargo-ship-components/component-012.glb", "estimatedBytes": 682420 },
-        "proxy": { "url": "proxy-box://component-012", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-012.glb",
+          "estimatedBytes": 1129700
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-012.glb",
+          "estimatedBytes": 873932
+        },
+        "proxy": {
+          "url": "proxy-box://component-012",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-012.json"
     },
     {
       "id": "component-013",
-      "center": [-27.862, 12.141, 2.883],
+      "center": [
+        -27.862,
+        12.141,
+        2.883
+      ],
       "radius": 3.088,
       "bounds": {
-        "min": [-30.416, 11.112, 1.483],
-        "max": [-25.309, 13.170, 4.283]
+        "min": [
+          -30.416,
+          11.112,
+          1.483
+        ],
+        "max": [
+          -25.309,
+          13.17,
+          4.283
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-013.glb", "estimatedBytes": 160108 },
-        "medium": { "url": "/models/cargo-ship-components/component-013.glb", "estimatedBytes": 160108 },
-        "proxy": { "url": "proxy-box://component-013", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-013.glb",
+          "estimatedBytes": 295948
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-013.glb",
+          "estimatedBytes": 227960
+        },
+        "proxy": {
+          "url": "proxy-box://component-013",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-013.json"
     },
     {
       "id": "component-014",
-      "center": [-15.354, 8.220, 6.501],
+      "center": [
+        -15.354,
+        8.22,
+        6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [-15.794, 7.767, 6.364],
-        "max": [-14.914, 8.673, 6.639]
+        "min": [
+          -15.794,
+          7.767,
+          6.364
+        ],
+        "max": [
+          -14.914,
+          8.673,
+          6.639
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-014.glb", "estimatedBytes": 394148 },
-        "medium": { "url": "/models/cargo-ship-components/component-014.glb", "estimatedBytes": 394148 },
-        "proxy": { "url": "proxy-box://component-014", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-014.glb",
+          "estimatedBytes": 1478292
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-014.glb",
+          "estimatedBytes": 936988
+        },
+        "proxy": {
+          "url": "proxy-box://component-014",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-014.json"
     },
     {
       "id": "component-015",
-      "center": [-10.354, 8.220, 6.501],
+      "center": [
+        -10.354,
+        8.22,
+        6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [-10.794, 7.767, 6.364],
-        "max": [-9.914, 8.673, 6.639]
+        "min": [
+          -10.794,
+          7.767,
+          6.364
+        ],
+        "max": [
+          -9.914,
+          8.673,
+          6.639
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-015.glb", "estimatedBytes": 394148 },
-        "medium": { "url": "/models/cargo-ship-components/component-015.glb", "estimatedBytes": 394148 },
-        "proxy": { "url": "proxy-box://component-015", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-015.glb",
+          "estimatedBytes": 1478292
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-015.glb",
+          "estimatedBytes": 936988
+        },
+        "proxy": {
+          "url": "proxy-box://component-015",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-015.json"
     },
     {
       "id": "component-016",
-      "center": [-5.354, 8.220, 6.501],
+      "center": [
+        -5.354,
+        8.22,
+        6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [-5.794, 7.767, 6.364],
-        "max": [-4.914, 8.673, 6.639]
+        "min": [
+          -5.794,
+          7.767,
+          6.364
+        ],
+        "max": [
+          -4.914,
+          8.673,
+          6.639
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-016.glb", "estimatedBytes": 394112 },
-        "medium": { "url": "/models/cargo-ship-components/component-016.glb", "estimatedBytes": 394112 },
-        "proxy": { "url": "proxy-box://component-016", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-016.glb",
+          "estimatedBytes": 1478292
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-016.glb",
+          "estimatedBytes": 936988
+        },
+        "proxy": {
+          "url": "proxy-box://component-016",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-016.json"
     },
     {
       "id": "component-017",
-      "center": [1.426, 8.220, 6.501],
+      "center": [
+        1.426,
+        8.22,
+        6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [0.986, 7.767, 6.364],
-        "max": [1.866, 8.673, 6.639]
+        "min": [
+          0.986,
+          7.767,
+          6.364
+        ],
+        "max": [
+          1.866,
+          8.673,
+          6.639
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-017.glb", "estimatedBytes": 393732 },
-        "medium": { "url": "/models/cargo-ship-components/component-017.glb", "estimatedBytes": 393732 },
-        "proxy": { "url": "proxy-box://component-017", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-017.glb",
+          "estimatedBytes": 1478296
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-017.glb",
+          "estimatedBytes": 936988
+        },
+        "proxy": {
+          "url": "proxy-box://component-017",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-017.json"
     },
     {
       "id": "component-018",
-      "center": [6.426, 8.220, 6.501],
+      "center": [
+        6.426,
+        8.22,
+        6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [5.986, 7.767, 6.364],
-        "max": [6.866, 8.673, 6.639]
+        "min": [
+          5.986,
+          7.767,
+          6.364
+        ],
+        "max": [
+          6.866,
+          8.673,
+          6.639
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-018.glb", "estimatedBytes": 393696 },
-        "medium": { "url": "/models/cargo-ship-components/component-018.glb", "estimatedBytes": 393696 },
-        "proxy": { "url": "proxy-box://component-018", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-018.glb",
+          "estimatedBytes": 1478296
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-018.glb",
+          "estimatedBytes": 936988
+        },
+        "proxy": {
+          "url": "proxy-box://component-018",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-018.json"
     },
     {
       "id": "component-019",
-      "center": [11.426, 8.220, 6.501],
+      "center": [
+        11.426,
+        8.22,
+        6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [10.986, 7.767, 6.364],
-        "max": [11.866, 8.673, 6.639]
+        "min": [
+          10.986,
+          7.767,
+          6.364
+        ],
+        "max": [
+          11.866,
+          8.673,
+          6.639
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-019.glb", "estimatedBytes": 393732 },
-        "medium": { "url": "/models/cargo-ship-components/component-019.glb", "estimatedBytes": 393732 },
-        "proxy": { "url": "proxy-box://component-019", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-019.glb",
+          "estimatedBytes": 1478296
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-019.glb",
+          "estimatedBytes": 936988
+        },
+        "proxy": {
+          "url": "proxy-box://component-019",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-019.json"
     },
     {
       "id": "component-020",
-      "center": [1.426, 8.220, -6.501],
+      "center": [
+        1.426,
+        8.22,
+        -6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [0.986, 7.767, -6.639],
-        "max": [1.866, 8.673, -6.364]
+        "min": [
+          0.986,
+          7.767,
+          -6.639
+        ],
+        "max": [
+          1.866,
+          8.673,
+          -6.364
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-020.glb", "estimatedBytes": 390936 },
-        "medium": { "url": "/models/cargo-ship-components/component-020.glb", "estimatedBytes": 390936 },
-        "proxy": { "url": "proxy-box://component-020", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-020.glb",
+          "estimatedBytes": 1478316
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-020.glb",
+          "estimatedBytes": 937008
+        },
+        "proxy": {
+          "url": "proxy-box://component-020",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-020.json"
     },
     {
       "id": "component-021",
-      "center": [-15.354, 8.220, -6.501],
+      "center": [
+        -15.354,
+        8.22,
+        -6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [-15.794, 7.767, -6.639],
-        "max": [-14.914, 8.673, -6.364]
+        "min": [
+          -15.794,
+          7.767,
+          -6.639
+        ],
+        "max": [
+          -14.914,
+          8.673,
+          -6.364
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-021.glb", "estimatedBytes": 391348 },
-        "medium": { "url": "/models/cargo-ship-components/component-021.glb", "estimatedBytes": 391348 },
-        "proxy": { "url": "proxy-box://component-021", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-021.glb",
+          "estimatedBytes": 1478312
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-021.glb",
+          "estimatedBytes": 937008
+        },
+        "proxy": {
+          "url": "proxy-box://component-021",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-021.json"
     },
     {
       "id": "component-022",
-      "center": [-10.354, 8.220, -6.501],
+      "center": [
+        -10.354,
+        8.22,
+        -6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [-10.794, 7.767, -6.639],
-        "max": [-9.914, 8.673, -6.364]
+        "min": [
+          -10.794,
+          7.767,
+          -6.639
+        ],
+        "max": [
+          -9.914,
+          8.673,
+          -6.364
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-022.glb", "estimatedBytes": 391348 },
-        "medium": { "url": "/models/cargo-ship-components/component-022.glb", "estimatedBytes": 391348 },
-        "proxy": { "url": "proxy-box://component-022", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-022.glb",
+          "estimatedBytes": 1478312
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-022.glb",
+          "estimatedBytes": 937008
+        },
+        "proxy": {
+          "url": "proxy-box://component-022",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-022.json"
     },
     {
       "id": "component-023",
-      "center": [-5.354, 8.220, -6.501],
+      "center": [
+        -5.354,
+        8.22,
+        -6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [-5.794, 7.767, -6.639],
-        "max": [-4.914, 8.673, -6.364]
+        "min": [
+          -5.794,
+          7.767,
+          -6.639
+        ],
+        "max": [
+          -4.914,
+          8.673,
+          -6.364
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-023.glb", "estimatedBytes": 391312 },
-        "medium": { "url": "/models/cargo-ship-components/component-023.glb", "estimatedBytes": 391312 },
-        "proxy": { "url": "proxy-box://component-023", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-023.glb",
+          "estimatedBytes": 1478312
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-023.glb",
+          "estimatedBytes": 937008
+        },
+        "proxy": {
+          "url": "proxy-box://component-023",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-023.json"
     },
     {
       "id": "component-024",
-      "center": [6.426, 8.220, -6.501],
+      "center": [
+        6.426,
+        8.22,
+        -6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [5.986, 7.767, -6.639],
-        "max": [6.866, 8.673, -6.364]
+        "min": [
+          5.986,
+          7.767,
+          -6.639
+        ],
+        "max": [
+          6.866,
+          8.673,
+          -6.364
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-024.glb", "estimatedBytes": 390936 },
-        "medium": { "url": "/models/cargo-ship-components/component-024.glb", "estimatedBytes": 390936 },
-        "proxy": { "url": "proxy-box://component-024", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-024.glb",
+          "estimatedBytes": 1478316
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-024.glb",
+          "estimatedBytes": 937008
+        },
+        "proxy": {
+          "url": "proxy-box://component-024",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-024.json"
     },
     {
       "id": "component-025",
-      "center": [11.426, 8.220, -6.501],
+      "center": [
+        11.426,
+        8.22,
+        -6.501
+      ],
       "radius": 0.646,
       "bounds": {
-        "min": [10.986, 7.767, -6.639],
-        "max": [11.866, 8.673, -6.364]
+        "min": [
+          10.986,
+          7.767,
+          -6.639
+        ],
+        "max": [
+          11.866,
+          8.673,
+          -6.364
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-025.glb", "estimatedBytes": 390864 },
-        "medium": { "url": "/models/cargo-ship-components/component-025.glb", "estimatedBytes": 390864 },
-        "proxy": { "url": "proxy-box://component-025", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-025.glb",
+          "estimatedBytes": 1478316
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-025.glb",
+          "estimatedBytes": 937008
+        },
+        "proxy": {
+          "url": "proxy-box://component-025",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-025.json"
     },
     {
       "id": "component-026",
-      "center": [-29.822, 10.660, 4.558],
+      "center": [
+        -29.822,
+        10.66,
+        4.558
+      ],
       "radius": 0.655,
       "bounds": {
-        "min": [-30.253, 10.207, 4.362],
-        "max": [-29.390, 11.113, 4.754]
+        "min": [
+          -30.253,
+          10.207,
+          4.362
+        ],
+        "max": [
+          -29.39,
+          11.113,
+          4.754
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-026.glb", "estimatedBytes": 394188 },
-        "medium": { "url": "/models/cargo-ship-components/component-026.glb", "estimatedBytes": 394188 },
-        "proxy": { "url": "proxy-box://component-026", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-026.glb",
+          "estimatedBytes": 1480436
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-026.glb",
+          "estimatedBytes": 937664
+        },
+        "proxy": {
+          "url": "proxy-box://component-026",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-026.json"
     },
     {
       "id": "component-027",
-      "center": [-25.366, 10.660, 5.647],
+      "center": [
+        -25.366,
+        10.66,
+        5.647
+      ],
       "radius": 0.652,
       "bounds": {
-        "min": [-25.803, 10.207, 5.475],
-        "max": [-24.930, 11.113, 5.819]
+        "min": [
+          -25.803,
+          10.207,
+          5.475
+        ],
+        "max": [
+          -24.93,
+          11.113,
+          5.819
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-027.glb", "estimatedBytes": 394200 },
-        "medium": { "url": "/models/cargo-ship-components/component-027.glb", "estimatedBytes": 394200 },
-        "proxy": { "url": "proxy-box://component-027", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-027.glb",
+          "estimatedBytes": 1480452
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-027.glb",
+          "estimatedBytes": 937668
+        },
+        "proxy": {
+          "url": "proxy-box://component-027",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-027.json"
     },
     {
       "id": "component-028",
-      "center": [-25.366, 10.660, -5.647],
+      "center": [
+        -25.366,
+        10.66,
+        -5.647
+      ],
       "radius": 0.652,
       "bounds": {
-        "min": [-25.803, 10.207, -5.819],
-        "max": [-24.930, 11.113, -5.475]
+        "min": [
+          -25.803,
+          10.207,
+          -5.819
+        ],
+        "max": [
+          -24.93,
+          11.113,
+          -5.475
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-028.glb", "estimatedBytes": 391808 },
-        "medium": { "url": "/models/cargo-ship-components/component-028.glb", "estimatedBytes": 391808 },
-        "proxy": { "url": "proxy-box://component-028", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-028.glb",
+          "estimatedBytes": 1480548
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-028.glb",
+          "estimatedBytes": 937832
+        },
+        "proxy": {
+          "url": "proxy-box://component-028",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-028.json"
     },
     {
       "id": "component-029",
-      "center": [-29.822, 10.660, -4.558],
+      "center": [
+        -29.822,
+        10.66,
+        -4.558
+      ],
       "radius": 0.655,
       "bounds": {
-        "min": [-30.253, 10.207, -4.754],
-        "max": [-29.390, 11.113, -4.362]
+        "min": [
+          -30.253,
+          10.207,
+          -4.754
+        ],
+        "max": [
+          -29.39,
+          11.113,
+          -4.362
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-029.glb", "estimatedBytes": 393064 },
-        "medium": { "url": "/models/cargo-ship-components/component-029.glb", "estimatedBytes": 393064 },
-        "proxy": { "url": "proxy-box://component-029", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-029.glb",
+          "estimatedBytes": 1480004
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-029.glb",
+          "estimatedBytes": 938200
+        },
+        "proxy": {
+          "url": "proxy-box://component-029",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-029.json"
     },
     {
       "id": "component-030",
-      "center": [-21.183, 10.599, 5.758],
+      "center": [
+        -21.183,
+        10.599,
+        5.758
+      ],
       "radius": 2.259,
       "bounds": {
-        "min": [-23.175, 9.950, 4.914],
-        "max": [-19.191, 11.249, 6.602]
+        "min": [
+          -23.175,
+          9.95,
+          4.914
+        ],
+        "max": [
+          -19.191,
+          11.249,
+          6.602
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-030.glb", "estimatedBytes": 820644 },
-        "medium": { "url": "/models/cargo-ship-components/component-030.glb", "estimatedBytes": 820644 },
-        "proxy": { "url": "proxy-box://component-030", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-030.glb",
+          "estimatedBytes": 1164280
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-030.glb",
+          "estimatedBytes": 987816
+        },
+        "proxy": {
+          "url": "proxy-box://component-030",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-030.json"
     },
     {
       "id": "component-031",
-      "center": [-21.183, 10.599, -5.758],
+      "center": [
+        -21.183,
+        10.599,
+        -5.758
+      ],
       "radius": 2.259,
       "bounds": {
-        "min": [-23.175, 9.950, -6.602],
-        "max": [-19.191, 11.249, -4.914]
+        "min": [
+          -23.175,
+          9.95,
+          -6.602
+        ],
+        "max": [
+          -19.191,
+          11.249,
+          -4.914
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-031.glb", "estimatedBytes": 820488 },
-        "medium": { "url": "/models/cargo-ship-components/component-031.glb", "estimatedBytes": 820488 },
-        "proxy": { "url": "proxy-box://component-031", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-031.glb",
+          "estimatedBytes": 1164316
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-031.glb",
+          "estimatedBytes": 987864
+        },
+        "proxy": {
+          "url": "proxy-box://component-031",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-031.json"
     },
     {
       "id": "component-032",
-      "center": [-19.381, 20.097, 0.000],
+      "center": [
+        -19.381,
+        20.097,
+        0
+      ],
       "radius": 8.731,
       "bounds": {
-        "min": [-21.941, 12.385, -3.193],
-        "max": [-16.820, 27.810, 3.193]
+        "min": [
+          -21.941,
+          12.385,
+          -3.193
+        ],
+        "max": [
+          -16.82,
+          27.81,
+          3.193
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-032.glb", "estimatedBytes": 4117304 },
-        "medium": { "url": "/models/cargo-ship-components/component-032.glb", "estimatedBytes": 4117304 },
-        "proxy": { "url": "proxy-box://component-032", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-032.glb",
+          "estimatedBytes": 3598272
+        },
+        "medium": {
+          "url": "proxy-box://component-032",
+          "estimatedBytes": 2048
+        },
+        "proxy": {
+          "url": "proxy-box://component-032",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-032.json"
     },
     {
       "id": "component-033",
-      "center": [-21.563, 13.602, 1.240],
+      "center": [
+        -21.563,
+        13.602,
+        1.24
+      ],
       "radius": 1.179,
       "bounds": {
-        "min": [-21.715, 12.476, 0.928],
-        "max": [-21.411, 14.729, 1.552]
+        "min": [
+          -21.715,
+          12.476,
+          0.928
+        ],
+        "max": [
+          -21.411,
+          14.729,
+          1.552
+        ]
       },
       "lods": {
-        "high": { "url": "/models/cargo-ship-components/component-033.glb", "estimatedBytes": 22368 },
-        "medium": { "url": "/models/cargo-ship-components/component-033.glb", "estimatedBytes": 22368 },
-        "proxy": { "url": "proxy-box://component-033", "estimatedBytes": 2048 }
+        "high": {
+          "url": "/models/cargo-ship-components/component-033.glb",
+          "estimatedBytes": 30976
+        },
+        "medium": {
+          "url": "/models/cargo-ship-components-medium/component-033.glb",
+          "estimatedBytes": 28088
+        },
+        "proxy": {
+          "url": "proxy-box://component-033",
+          "estimatedBytes": 2048
+        }
       },
       "metadataUrl": "/metadata/component-033.json"
     }

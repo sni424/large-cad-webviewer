@@ -356,9 +356,108 @@ void writeManifest(
   out << "}\n";
 }
 
+// reference(instance) label에는 색상이 직접 붙지 않고, GetReferredShape로 찾는
+// prototype label 쪽에 색상이 붙어 있는 경우가 XCAF 조립 구조에서는 일반적입니다.
+// 색상을 조회할 땐 항상 이 함수로 얻은 label을 사용해야 합니다.
+// (XCAFPrs::CollectStyleSettings로 대체를 시도했으나 실기기 검증에서 색이 거의 전부
+// 사라지는 회귀가 확인되어, 직접 검증됐던 이 방식으로 되돌립니다.)
+TDF_Label resolveColorLabel(const Handle(XCAFDoc_ShapeTool)& shapeTool, const TDF_Label& label) {
+  TDF_Label referredLabel;
+  if (XCAFDoc_ShapeTool::IsReference(label) && XCAFDoc_ShapeTool::GetReferredShape(label, referredLabel)) {
+    return referredLabel;
+  }
+  return label;
+}
+
+const XCAFDoc_ColorType kColorTypes[] = {
+    XCAFDoc_ColorGen,
+    XCAFDoc_ColorSurf,
+    XCAFDoc_ColorCurv,
+};
+
+// label 하나에서 찾을 수 있는 색을 모두 tileColorTool에 복사합니다.
+// 하나라도 찾았으면 true를 돌려줍니다.
+bool copyLabelColor(
+    const TDF_Label& fromLabel,
+    const Handle(XCAFDoc_ColorTool)& tileColorTool,
+    const TDF_Label& toLabel
+) {
+  bool found = false;
+
+  for (const XCAFDoc_ColorType colorType : kColorTypes) {
+    Quantity_Color color;
+    if (XCAFDoc_ColorTool::GetColor(fromLabel, colorType, color)) {
+      tileColorTool->SetColor(toLabel, color, colorType);
+      found = true;
+    }
+  }
+
+  return found;
+}
+
+bool copyMatchingSubShapeColor(
+    const TDF_LabelSequence& sourceSubShapeLabels,
+    const TopoDS_Shape& sourceFace,
+    const Handle(XCAFDoc_ColorTool)& tileColorTool,
+    const TDF_Label& targetFaceLabel
+) {
+  bool found = false;
+
+  for (Standard_Integer index = 1; index <= sourceSubShapeLabels.Length(); ++index) {
+    const TDF_Label sourceSubShapeLabel = sourceSubShapeLabels.Value(index);
+    const TopoDS_Shape sourceSubShape = XCAFDoc_ShapeTool::GetShape(sourceSubShapeLabel);
+
+    if (sourceSubShape.IsNull() || !(sourceSubShape.IsSame(sourceFace) || sourceSubShape.IsPartner(sourceFace))) {
+      continue;
+    }
+
+    found = copyLabelColor(sourceSubShapeLabel, tileColorTool, targetFaceLabel) || found;
+  }
+
+  return found;
+}
+
+void exportDocumentLabelGlb(
+    const Handle(TDocStd_Document)& sourceDocument,
+    const TDF_Label& sourceLabel,
+    const TopoDS_Shape& sourceShape,
+    const fs::path& outputPath,
+    const Options& options
+) {
+  if (!outputPath.parent_path().empty()) {
+    fs::create_directories(outputPath.parent_path());
+  }
+
+  // 색상/face style은 원본 XCAF document의 label 관계 안에 들어 있습니다.
+  // 새 문서에 shape만 다시 넣으면 그 관계가 끊겨 split GLB가 회색이 되므로,
+  // component label을 원본 문서에서 root로 직접 export합니다.
+  BRepMesh_IncrementalMesh mesher(
+      sourceShape,
+      options.linearDeflection,
+      options.relative,
+      options.angularDeflection,
+      true
+  );
+  mesher.Perform();
+
+  NCollection_Sequence<TDF_Label> rootLabels;
+  rootLabels.Append(sourceLabel);
+
+  TColStd_IndexedDataMapOfStringString fileInfo;
+  fileInfo.Add("Generator", "large-cad-webviewer occt-step-to-glb split-components-original-xcaf");
+
+  RWGltf_CafWriter writer(TCollection_AsciiString(outputPath.string().c_str()), true);
+  if (!writer.Perform(sourceDocument, rootLabels, nullptr, fileInfo, Message_ProgressRange())) {
+    throw std::runtime_error("OCCT failed to write component GLB: " + outputPath.string());
+  }
+}
 void exportShapeGlb(
+    const Handle(XCAFDoc_ShapeTool)& sourceShapeTool,
+    const Handle(XCAFDoc_ColorTool)& sourceColorTool,
+    const TopoDS_Shape& sourceShape,
     const TopoDS_Shape& shape,
     const TDF_Label& sourceLabel,
+    const TDF_Label& parentLabel,
     const fs::path& outputPath,
     const Options& options
 ) {
@@ -383,18 +482,94 @@ void exportShapeGlb(
   Handle(XCAFDoc_ColorTool) tileColorTool = XCAFDoc_DocumentTool::ColorTool(tileDocument->Main());
   const TDF_Label tileLabel = tileShapeTool->AddShape(shape, false);
 
-  // STEP 안의 이미지 텍스처는 보통 GLB까지 이어지지 않지만,
-  // XCAF label에 붙은 CAD 색상은 가능한 범위에서 새 component 문서로 복사합니다.
-  // 이 처리를 하지 않으면 split-components export에서 단일 GLB보다 색상이 더 쉽게 사라집니다.
-  const XCAFDoc_ColorType colorTypes[] = {
-      XCAFDoc_ColorGen,
-      XCAFDoc_ColorSurf,
-      XCAFDoc_ColorCurv,
-  };
-  for (const XCAFDoc_ColorType colorType : colorTypes) {
-    Quantity_Color color;
-    if (XCAFDoc_ColorTool::GetColor(sourceLabel, colorType, color)) {
-      tileColorTool->SetColor(tileLabel, color, colorType);
+  // sourceLabel은 조립 트리의 component(reference) label이라 색상이 직접 붙어있지 않습니다.
+  // 실제 색상(라벨/면 색 모두)은 GetReferredShape로 찾는 prototype label 쪽에 붙습니다.
+  // prototype과 sourceShape/shape는 위치(Location)만 다를 뿐 같은 topology이므로
+  // TopExp_Explorer 순회 순서가 그대로 대응됩니다.
+  const TDF_Label colorLabel = resolveColorLabel(sourceShapeTool, sourceLabel);
+  const TopoDS_Shape colorShape =
+      colorLabel == sourceLabel ? sourceShape : sourceShapeTool->GetShape(colorLabel);
+
+  bool hasOwnColor = copyLabelColor(colorLabel, tileColorTool, tileLabel);
+
+  // 이 shape 자체에 색이 없으면 상위 assembly의 색을 기본값으로 상속해봅니다.
+  if (!hasOwnColor && !parentLabel.IsNull()) {
+    const TDF_Label parentColorLabel = resolveColorLabel(sourceShapeTool, parentLabel);
+    hasOwnColor = copyLabelColor(parentColorLabel, tileColorTool, tileLabel);
+  }
+
+  // 그래도 못 찾았으면(자기 label/prototype/상위 assembly 어디에도 색이 없는 shape),
+  // material 필드를 비워두는 대신 단일 GLB에서 무색 shape에 실제로 쓰이는
+  // 기본색을 명시적으로 채워둡니다. 비워두면 glTF 로더가 자체 기본 머티리얼로
+  // 대체하면서 doubleSided 등이 달라져 렌더링이 어긋날 수 있습니다.
+  if (!hasOwnColor) {
+    tileColorTool->SetColor(tileLabel, Quantity_Color(0.2423, 0.2623, 0.2623, Quantity_TOC_RGB), XCAFDoc_ColorSurf);
+  }
+
+  TopExp_Explorer sourceFaceExplorer(colorShape, TopAbs_FACE);
+  TopExp_Explorer targetFaceExplorer(shape, TopAbs_FACE);
+  TDF_LabelSequence sourceSubShapeLabels;
+  XCAFDoc_ShapeTool::GetSubShapes(colorLabel, sourceSubShapeLabels);
+
+  for (; sourceFaceExplorer.More() && targetFaceExplorer.More();
+       sourceFaceExplorer.Next(), targetFaceExplorer.Next()) {
+    const TopoDS_Shape sourceFace = sourceFaceExplorer.Current();
+    const TopoDS_Shape targetFace = targetFaceExplorer.Current();
+    TDF_Label targetFaceLabel;
+    TDF_Label sourceFaceLabel;
+    bool copiedSubShapeColor = false;
+
+    // XCAF에서 face별 색상은 TopoDS_Face 자체가 아니라 shape label 아래의
+    // subshape label에 붙어 있는 경우가 많습니다. 먼저 OCCT 내부 맵으로
+    // 현재 sourceFace에 대응하는 subshape label을 찾고, 그 label의 색을
+    // 새 tile 문서의 targetFace label에 복사합니다.
+    if (sourceShapeTool->FindSubShape(colorLabel, sourceFace, sourceFaceLabel) && !sourceFaceLabel.IsNull()) {
+      tileShapeTool->AddSubShape(tileLabel, targetFace, targetFaceLabel);
+
+      if (!targetFaceLabel.IsNull()) {
+        copiedSubShapeColor = copyLabelColor(sourceFaceLabel, tileColorTool, targetFaceLabel);
+      }
+    }
+
+    // FindSubShape가 놓치는 reference/prototype 조합을 대비한 보조 경로입니다.
+    if (!copiedSubShapeColor && !sourceSubShapeLabels.IsEmpty()) {
+      if (targetFaceLabel.IsNull()) {
+        tileShapeTool->AddSubShape(tileLabel, targetFace, targetFaceLabel);
+      }
+
+      if (!targetFaceLabel.IsNull()) {
+        copiedSubShapeColor = copyMatchingSubShapeColor(
+            sourceSubShapeLabels,
+            sourceFace,
+            tileColorTool,
+            targetFaceLabel
+        );
+      }
+    }
+
+    if (copiedSubShapeColor) {
+      continue;
+    }
+
+    for (const XCAFDoc_ColorType colorType : kColorTypes) {
+      Quantity_Color color;
+      bool hasFaceColor = false;
+
+      if (sourceColorTool->GetColor(sourceFace, colorType, color)) {
+        hasFaceColor = true;
+      }
+
+      if (!hasFaceColor) {
+        continue;
+      }
+
+      if (targetFaceLabel.IsNull()) {
+        tileShapeTool->AddSubShape(tileLabel, targetFace, targetFaceLabel);
+      }
+
+      if (!targetFaceLabel.IsNull()) {
+        tileColorTool->SetColor(targetFaceLabel, color, colorType);
+      }
     }
   }
 
@@ -410,7 +585,8 @@ void exportShapeGlb(
 void collectComponentLabels(
     const Handle(XCAFDoc_ShapeTool)& shapeTool,
     const TDF_LabelSequence& freeShapes,
-    TDF_LabelSequence& componentLabels
+    TDF_LabelSequence& componentLabels,
+    TDF_LabelSequence& parentLabels
 ) {
   for (Standard_Integer index = 1; index <= freeShapes.Length(); ++index) {
     TDF_LabelSequence children;
@@ -418,22 +594,32 @@ void collectComponentLabels(
 
     if (children.IsEmpty()) {
       componentLabels.Append(freeShapes.Value(index));
+      parentLabels.Append(TDF_Label());
       continue;
     }
 
     for (Standard_Integer childIndex = 1; childIndex <= children.Length(); ++childIndex) {
       componentLabels.Append(children.Value(childIndex));
+      parentLabels.Append(freeShapes.Value(index));
     }
   }
 }
 
 void splitComponentsToGlb(
+    const Handle(TDocStd_Document)& document,
     const Handle(XCAFDoc_ShapeTool)& shapeTool,
     const TDF_LabelSequence& freeShapes,
     const Options& options
 ) {
+  // shapeTool->Label()은 XCAF 문서 안의 shapes section label입니다.
+  // ColorTool은 document main label 아래에 있으므로 Root()가 아니라 Father()를 써야
+  // 원본 STEP 문서의 color table과 shape-color 링크를 정상 조회할 수 있습니다.
+  const TDF_Label documentMainLabel = shapeTool->Label().Father();
+  Handle(XCAFDoc_ColorTool) sourceColorTool =
+      XCAFDoc_DocumentTool::ColorTool(documentMainLabel);
   TDF_LabelSequence componentLabels;
-  collectComponentLabels(shapeTool, freeShapes, componentLabels);
+  TDF_LabelSequence parentLabels;
+  collectComponentLabels(shapeTool, freeShapes, componentLabels, parentLabels);
   const Normalization normalization = computeNormalization(shapeTool, freeShapes);
 
   std::cout << "[3/4] Exporting " << componentLabels.Length() << " component GLB tile(s)\n";
@@ -459,7 +645,7 @@ void splitComponentsToGlb(
     const fs::path tilePath = fs::path(options.outputPath) / fileName;
 
     std::cout << "  exporting " << id << " -> " << tilePath.string() << "\n";
-    exportShapeGlb(shape, label, tilePath, options);
+    exportDocumentLabelGlb(document, label, sourceShape, tilePath, options);
 
     ExportedTile tile = buildTileInfo(id, fileName, shape);
     tile.estimatedBytes = fs::file_size(tilePath);
@@ -637,7 +823,7 @@ void convertStepToGlb(const Options& options) {
   shapeTool->GetFreeShapes(freeShapes);
 
   if (options.splitComponents) {
-    splitComponentsToGlb(shapeTool, freeShapes, options);
+    splitComponentsToGlb(document, shapeTool, freeShapes, options);
     return;
   }
 

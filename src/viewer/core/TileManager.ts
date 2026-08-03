@@ -25,6 +25,7 @@ export interface TileStatusDebugRow {
 export class TileManager {
   private readonly scene: THREE.Scene;
   private readonly tiles = new Map<string, TileRuntime>();
+  private readonly pendingAttachTileIds = new Set<string>();
   private readonly root = new THREE.Group();
   private readonly queue = new LoadQueue(1);
   private readonly lodController = new LODController();
@@ -33,6 +34,8 @@ export class TileManager {
   private mode: LoadMode = 'optimized';
   private modeStartedAt = performance.now();
   private initialDisplayMs: number | null = null;
+  private isNavigating = false;
+  private viewportHeight = 1;
 
   constructor(scene: THREE.Scene, manifest: CadManifest) {
     this.scene = scene;
@@ -63,9 +66,18 @@ export class TileManager {
     this.reset(camera);
   }
 
+  setNavigationState(isNavigating: boolean): void {
+    this.isNavigating = isNavigating;
+  }
+
+  setViewportHeight(viewportHeight: number): void {
+    this.viewportHeight = Math.max(1, viewportHeight);
+  }
+
   // 모드 전환 또는 시연 재시작 때 모든 타일과 큐 상태를 초기화합니다.
   reset(camera: THREE.Camera): void {
     this.queue.clear();
+    this.pendingAttachTileIds.clear();
 
     for (const tile of this.tiles.values()) {
       tile.requestToken += 1;
@@ -101,7 +113,10 @@ export class TileManager {
         continue;
       }
 
-      const desiredLod = this.lodController.getDesiredLod(tile, tile.lastDistance);
+      const desiredLod = this.lodController.getDesiredLod(tile, {
+        camera,
+        viewportHeight: this.viewportHeight,
+      });
 
       if (desiredLod === null) {
         this.queue.cancel((job) => job.tileId === tile.entry.id);
@@ -117,6 +132,7 @@ export class TileManager {
       this.ensureTile(tile, desiredLod, tile.lastDistance);
     }
 
+    this.attachReadyTiles();
   }
 
   // PerformancePanel에 전달할 현재 렌더링 지표입니다.
@@ -175,21 +191,9 @@ export class TileManager {
       tile.lastUsedAt = performance.now();
 
       if (tile.object.parent !== this.root) {
-        tile.object.visible = true;
-        this.root.add(tile.object);
-        tile.state = 'loaded';
+        this.pendingAttachTileIds.add(tile.entry.id);
       }
 
-      return;
-    }
-
-    // 이미 더 높은 LOD가 로딩되어 있다면 낮은 LOD로 즉시 갈아타지 않습니다.
-    // high -> proxy 교체 과정에서 기존 GLB를 dispose하면,
-    // 다시 가까워질 때 GLB 파싱/GPU 업로드가 반복되어 더 큰 프레임 드랍이 생깁니다.
-    if (tile.object && tile.activeLod && isLodDowngrade(tile.activeLod, lod)) {
-      tile.desiredLod = tile.activeLod;
-      tile.lastUsedAt = performance.now();
-      tile.state = tile.object.parent === this.root ? 'loaded' : 'unloaded';
       return;
     }
 
@@ -234,11 +238,8 @@ export class TileManager {
         tile.loadedBytes = tile.entry.lods[lod].estimatedBytes;
         tile.lastUsedAt = performance.now();
         tile.state = 'loaded';
-        this.root.add(object);
-
-        if (this.initialDisplayMs === null) {
-          this.initialDisplayMs = performance.now() - this.modeStartedAt;
-        }
+        object.visible = false;
+        this.pendingAttachTileIds.add(tile.entry.id);
       },
       onError: (error) => {
         console.error(`Failed to load tile ${tile.entry.id} (${lod})`, error);
@@ -255,8 +256,50 @@ export class TileManager {
 
     this.root.remove(tile.object);
     tile.object.visible = false;
+    this.pendingAttachTileIds.delete(tile.entry.id);
     tile.state = 'unloaded';
     tile.lastUsedAt = performance.now();
+  }
+
+  private attachReadyTiles(): void {
+    // GLB 파싱이 끝난 객체를 scene에 붙이는 순간에도 GPU buffer upload가 일어날 수 있습니다.
+    // 한 프레임에 여러 개를 붙이면 카메라 이동 중 끊김이 커지므로, 가까운 타일부터 1개씩 붙입니다.
+    const attachBudgetPerFrame = 1;
+    let attachedCount = 0;
+
+    const attachCandidates = [...this.pendingAttachTileIds]
+      .map((tileId) => this.tiles.get(tileId))
+      .filter((tile): tile is TileRuntime => Boolean(tile?.object))
+      .sort((a, b) => a.lastDistance - b.lastDistance);
+
+    for (const tile of attachCandidates) {
+      if (attachedCount >= attachBudgetPerFrame) {
+        return;
+      }
+
+      this.pendingAttachTileIds.delete(tile.entry.id);
+
+      if (!tile.object || tile.desiredLod === null || tile.object.parent === this.root) {
+        continue;
+      }
+
+      // 카메라를 돌리거나 줌하는 동안 high 타일을 공개하면 조작 중 프레임이 끊깁니다.
+      // 로딩은 뒤에서 진행하되, high attach는 사용자가 멈춘 뒤 적용합니다.
+      if (this.isNavigating && tile.activeLod === 'high' && this.mode === 'optimized') {
+        this.pendingAttachTileIds.add(tile.entry.id);
+        continue;
+      }
+
+      tile.object.visible = true;
+      this.root.add(tile.object);
+      tile.state = 'loaded';
+      tile.lastUsedAt = performance.now();
+      attachedCount += 1;
+
+      if (this.initialDisplayMs === null) {
+        this.initialDisplayMs = performance.now() - this.modeStartedAt;
+      }
+    }
   }
 
   private disposeTile(tile: TileRuntime, clearEvenAttached: boolean): void {
@@ -265,6 +308,7 @@ export class TileManager {
     }
 
     tile.state = 'disposing';
+    this.pendingAttachTileIds.delete(tile.entry.id);
 
     if (tile.object.parent === this.root) {
       this.root.remove(tile.object);
@@ -278,20 +322,4 @@ export class TileManager {
     tile.loadedBytes = 0;
     tile.state = 'unloaded';
   }
-}
-
-function lodRank(lod: LodLevel): number {
-  if (lod === 'proxy') {
-    return 0;
-  }
-
-  if (lod === 'medium') {
-    return 1;
-  }
-
-  return 2;
-}
-
-function isLodDowngrade(current: LodLevel, next: LodLevel): boolean {
-  return lodRank(next) < lodRank(current);
 }

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type { LodLevel, TileManifestEntry } from '../types';
 import { ProceduralTileFactory } from './ProceduralTileFactory';
 
@@ -28,7 +29,143 @@ export class ModelLoader {
     const scene = gltf.scene;
     scene.name = `${entry.id}-${lod}`;
 
-    return scene;
+    return this.optimizeStaticCadObject(scene);
+  }
+
+  private optimizeStaticCadObject(scene: THREE.Object3D): THREE.Object3D {
+    const meshGroups = new Map<string, Array<THREE.Mesh>>();
+    const preservedMeshes: Array<THREE.Mesh> = [];
+
+    scene.updateWorldMatrix(true, true);
+    scene.traverse((object) => {
+      if (!(object instanceof THREE.Mesh) || !object.geometry) {
+        return;
+      }
+
+      object.castShadow = false;
+      object.receiveShadow = false;
+      object.frustumCulled = true;
+      object.matrixAutoUpdate = false;
+
+      // 텍스처/멀티 머티리얼/geometry group이 있는 mesh는 병합하지 않습니다.
+      // 이런 mesh를 무리하게 merge하면 UV, group, material index가 깨져서 텍스처가 사라질 수 있습니다.
+      if (!this.canMergeWithoutChangingAppearance(object)) {
+        preservedMeshes.push(this.cloneWorldSpaceMesh(object));
+        return;
+      }
+
+      const materialKey = object.material.uuid;
+      const group = meshGroups.get(materialKey) ?? [];
+
+      group.push(object);
+      meshGroups.set(materialKey, group);
+    });
+
+    const mergedRoot = new THREE.Group();
+    mergedRoot.name = `${scene.name}-merged`;
+    let mergedAny = false;
+
+    for (const meshes of meshGroups.values()) {
+      if (meshes.length === 0) {
+        continue;
+      }
+
+      const geometries = meshes.map((mesh) => {
+        const geometry = mesh.geometry.clone();
+
+        geometry.applyMatrix4(mesh.matrixWorld);
+        return geometry;
+      });
+
+      const mergedGeometry = mergeGeometries(geometries, false);
+
+      for (const geometry of geometries) {
+        geometry.dispose();
+      }
+
+      if (!mergedGeometry) {
+        for (const mesh of meshes) {
+          preservedMeshes.push(this.cloneWorldSpaceMesh(mesh));
+        }
+        continue;
+      }
+
+      const sourceMaterial = meshes[0].material;
+      const mergedMesh = new THREE.Mesh(mergedGeometry, sourceMaterial);
+
+      mergedMesh.name = `${scene.name}-batch-${mergedRoot.children.length + 1}`;
+      mergedMesh.castShadow = false;
+      mergedMesh.receiveShadow = false;
+      mergedMesh.frustumCulled = true;
+      mergedMesh.matrixAutoUpdate = false;
+      mergedRoot.add(mergedMesh);
+      mergedAny = true;
+    }
+
+    for (const mesh of preservedMeshes) {
+      mergedRoot.add(mesh);
+    }
+
+    if (!mergedAny && preservedMeshes.length === 0) {
+      return scene;
+    }
+
+    scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        object.geometry.dispose();
+      }
+    });
+
+    return mergedRoot;
+  }
+
+  private canMergeWithoutChangingAppearance(mesh: THREE.Mesh): mesh is THREE.Mesh<
+    THREE.BufferGeometry,
+    THREE.Material
+  > {
+    if (Array.isArray(mesh.material)) {
+      return false;
+    }
+
+    if (mesh.geometry.groups.length > 0) {
+      return false;
+    }
+
+    return !this.hasTextureMap(mesh.material);
+  }
+
+  private hasTextureMap(material: THREE.Material): boolean {
+    const textureKeys = [
+      'map',
+      'aoMap',
+      'alphaMap',
+      'bumpMap',
+      'displacementMap',
+      'emissiveMap',
+      'envMap',
+      'lightMap',
+      'metalnessMap',
+      'normalMap',
+      'roughnessMap',
+    ] as const;
+
+    const materialRecord = material as unknown as Record<string, unknown>;
+
+    return textureKeys.some((key) => materialRecord[key] instanceof THREE.Texture);
+  }
+
+  private cloneWorldSpaceMesh(mesh: THREE.Mesh): THREE.Mesh {
+    const geometry = mesh.geometry.clone();
+    geometry.applyMatrix4(mesh.matrixWorld);
+
+    const clone = new THREE.Mesh(geometry, mesh.material);
+    clone.name = mesh.name;
+    clone.castShadow = false;
+    clone.receiveShadow = false;
+    clone.frustumCulled = true;
+    clone.matrixAutoUpdate = false;
+
+    return clone;
   }
 
   private createProxyBox(entry: TileManifestEntry, lod: LodLevel): THREE.Object3D {

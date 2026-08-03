@@ -1,6 +1,7 @@
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef } from 'react';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { CadManifest, LoadMode } from './types';
 import { TileManager } from './core/TileManager';
 import { PerformanceMonitor } from './core/PerformanceMonitor';
@@ -15,9 +16,9 @@ export function ViewerCanvas({ manifest, mode }: ViewerCanvasProps) {
   return (
     <Canvas
       className="h-full w-full bg-slate-950"
-      dpr={[1, 2]}
+      dpr={[1, 1.5]}
       gl={{
-        antialias: true,
+        antialias: false,
         powerPreference: 'high-performance',
       }}
     >
@@ -25,7 +26,6 @@ export function ViewerCanvas({ manifest, mode }: ViewerCanvasProps) {
       <color attach="background" args={['#10161b']} />
       <SceneLighting />
       <SceneFloor />
-      <OrbitControls makeDefault target={[5, 5, 8]} enableDamping dampingFactor={0.08} />
       <TileRuntimeBridge manifest={manifest} mode={mode} />
     </Canvas>
   );
@@ -55,9 +55,11 @@ function SceneFloor() {
 }
 
 function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
-  const { scene, camera, gl } = useThree();
+  const { scene, camera, gl, size } = useThree();
   const monitor = useMemo(() => new PerformanceMonitor(), []);
   const managerRef = useRef<TileManager | null>(null);
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const lastTileUpdateAtRef = useRef(0);
   const setSnapshot = useViewerStore((state) => state.setSnapshot);
   const setTileRows = useViewerStore((state) => state.setTileRows);
 
@@ -65,17 +67,57 @@ function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
     const manager = new TileManager(scene, manifest);
 
     managerRef.current = manager;
+    manager.setViewportHeight(size.height);
     manager.reset(camera);
 
     return () => {
       manager.dispose();
       managerRef.current = null;
     };
-  }, [camera, manifest, scene]);
+  }, [camera, manifest, scene, size.height]);
+
+  useEffect(() => {
+    managerRef.current?.setViewportHeight(size.height);
+  }, [size.height]);
 
   useEffect(() => {
     managerRef.current?.setMode(mode, camera);
   }, [camera, mode]);
+
+  useEffect(() => {
+    const controls = controlsRef.current;
+
+    if (!controls) {
+      return;
+    }
+
+    let idleTimer = window.setTimeout(() => {
+      managerRef.current?.setNavigationState(false);
+    }, 0);
+
+    const markNavigating = () => {
+      window.clearTimeout(idleTimer);
+      managerRef.current?.setNavigationState(true);
+    };
+
+    const markIdleSoon = () => {
+      window.clearTimeout(idleTimer);
+      idleTimer = window.setTimeout(() => {
+        managerRef.current?.setNavigationState(false);
+      }, 180);
+    };
+
+    controls.addEventListener('start', markNavigating);
+    controls.addEventListener('change', markNavigating);
+    controls.addEventListener('end', markIdleSoon);
+
+    return () => {
+      window.clearTimeout(idleTimer);
+      controls.removeEventListener('start', markNavigating);
+      controls.removeEventListener('change', markNavigating);
+      controls.removeEventListener('end', markIdleSoon);
+    };
+  }, []);
 
   useFrame(() => {
     const manager = managerRef.current;
@@ -85,8 +127,16 @@ function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
     }
 
     const frame = monitor.frame();
+    const now = performance.now();
 
-    manager.update(camera);
+    // 타일 거리 판정과 큐 갱신은 매 프레임 할 필요가 없습니다.
+    // 100ms 간격이면 카메라 반응은 충분히 빠르고, 큰 CAD에서 CPU 부하가 훨씬 안정적입니다.
+    if (now - lastTileUpdateAtRef.current > 100) {
+      manager.setViewportHeight(size.height);
+      manager.update(camera);
+      lastTileUpdateAtRef.current = now;
+    }
+
     gl.info.reset();
 
     // useFrame은 R3F가 실제 render를 호출하기 전에 실행됩니다.
@@ -95,5 +145,13 @@ function TileRuntimeBridge({ manifest, mode }: ViewerCanvasProps) {
     setTileRows(manager.getTileRows());
   });
 
-  return null;
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      makeDefault
+      target={[5, 5, 8]}
+      enableDamping
+      dampingFactor={0.08}
+    />
+  );
 }
