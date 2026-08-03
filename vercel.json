@@ -1,5 +1,5 @@
 {
-  "buildCommand": "bun run build:vercel",
+  "buildCommand": "node scripts/copy-public-assets.mjs",
   "outputDirectory": "dist",
-  "installCommand": "bun install"
+  "installCommand": "echo skip install"
 }
